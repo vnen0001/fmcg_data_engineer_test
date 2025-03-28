@@ -203,7 +203,7 @@ class BookScrapper(scrapy.Spider):
             "Four": 4,
             "Five": 5
         }
-        book_rating_value = rating_mapping.get(book_rating.split()[-1], "Unknown") if book_rating else "Unknown"
+        book_rating_value = rating_mapping.get(book_rating.split()[-1],None) if book_rating else None
 
         with open(self.books_data_csv,'a',newline='',encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
