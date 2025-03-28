@@ -106,23 +106,41 @@ def __init__(self):
 #### Extracting Book Data
 
 ```python
-def parse(self, response):
-    book_name = response.css("div.product_main h1::text").get().strip()
-    book_category = response.css("ul.breadcrumb li:nth-child(3) a::text").get()
-    book_category = book_category.strip() if book_category else "Unknown"
-    book_price = response.css("p.price_color::text").get()
-    
-    # Data validation for price
-    if book_price:
-        book_price = book_price.strip('£')
-        try:
-            book_price = float(book_price)
-        except ValueError:
-            logging.error(f'Invalid price for {book_name}: {book_price}')
-            return
-    else:
-        logging.error(f'No price found for {book_name}')
-        return
+        book_name = response.css("div.product_main h1::text").get().strip()               # Book Name
+        book_category = response.css("ul.breadcrumb li:nth-child(3) a::text").get()       # Book Category and replacing it by Unkown if empty
+        book_category = book_category.strip() if book_category else "Unknown"             
+        book_price = response.css("p.price_color::text").get()                 # Stripiing whitespace and £ sign 
+
+        #Data validation for price
+        if book_price:
+            book_price = book_price.strip('£')
+            try:
+                book_price = float(book_price)
+            except ValueError:
+                logging.error(f'Invalid price for {book_name}: {book_price}')
+                return  # It will skip the book with invalid price
+        else:
+            logging.error(f'No price found for {book_name}')
+            return # Will also skip book if no price.
+        book_stock_text = response.css("p.instock.availability::text").getall()
+        book_stock = re.search(r'\d+', " ".join(book_stock_text).strip())                 # Using regex to stock quantity e.g. In Stock (22) will give 22. 
+
+        # Data validation for book stock 
+        if book_stock:
+            book_stock = int(book_stock.group())
+        else:
+            logging.error(f'Assuming 0 stock for {book_name}')
+            book_stock=0
+            
+        book_rating = response.css("p.star-rating::attr(class)").get()                    # Mapping rating words to number 
+        rating_mapping = {
+            "One": 1,
+            "Two": 2,
+            "Three": 3,
+            "Four": 4,
+            "Five": 5
+        }
+        book_rating_value = rating_mapping.get(book_rating.split()[-1],None) if book_rating else None
 ```
 
 ## Database Setup
