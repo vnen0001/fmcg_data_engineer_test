@@ -1,1 +1,4 @@
 /scrapping-venv
+books_data.csv
+categories_data.csv
+*.pyc
