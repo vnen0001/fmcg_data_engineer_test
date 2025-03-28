@@ -53,7 +53,7 @@ class BookScrapper(scrapy.Spider):
             logging.info('Succesfully Intialised Books Data CSVfile')
 
         with open( self.categories_data_csv,'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ['Category_Name', 'Category_Url']
+            fieldnames = ['Category_Name']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             logging.info('Succesfully Intialised Categories Data  CSVfile')
@@ -76,14 +76,14 @@ class BookScrapper(scrapy.Spider):
 
         for category in categories_list:
             category_name = category.css("::text").get().strip()
-            category_url = category.css("::attr(href)").get().strip()
-            category_joined_url= urljoin(response.url,category_url)
+            # category_url = category.css("::attr(href)").get().strip()
+            # category_joined_url= urljoin(response.url,category_url)
            
             
             
             with open(self.categories_data_csv,'a',newline='',encoding='utf-8') as csvfile:
                 writer = csv.writer(csvfile)
-                writer.writerow([category_name,category_joined_url])
+                writer.writerow([category_name])
                 
             logging.info(f"Successfully scraped category: {category_name}")
         # for url in self.start_urls:
@@ -123,12 +123,13 @@ class BookScrapper(scrapy.Spider):
         """
 
         book_name = response.css("div.product_main h1::text").get().strip()
-        book_category = response.css("ul.breadcrumb li:nth-child(3) a::text").get().strip()
+        book_category = response.css("ul.breadcrumb li:nth-child(3) a::text").get()
+        book_category = book_category.strip() if book_category else "Unknown"
         book_price = response.css("p.price_color::text").get().strip('£')
         book_stock_text = response.css("p.instock.availability::text").getall()
-        book_stock_text = " ".join(book_stock_text).strip()  
-        match = re.search(r"\((\d+)\)", book_stock_text)    
-        book_stock = int(match.group(1)) if match else 0
+        book_stock = re.search(r'\d+', " ".join(book_stock_text).strip())
+
+        book_stock = int(book_stock.group()) if book_stock else "Unknown"
         book_rating = response.css("p.star-rating::attr(class)").get()
         # replace_empty_rating = book_rating.replace("star-rating","").strip() if book_rating else "Unknown"
         rating_mapping = {
