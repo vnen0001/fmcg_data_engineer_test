@@ -10,7 +10,6 @@ This repository contains a data engineering pipeline that scrapes book data from
 - [Web Scraping](#web-scraping)
 - [Database Setup](#database-setup)
 - [SQL Queries](#sql-queries)
-- [Visualization](#visualization)
 - [Automation](#automation)
 
 ## Project Overview
